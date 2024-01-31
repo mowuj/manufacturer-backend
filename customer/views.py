@@ -39,13 +39,16 @@ class UserLoginView(APIView):
             user = authenticate(username=username, password=password)
 
             if user:
-                token, _ = Token.objects.get_or_create(user=user)
-                print(token)
-                print(_)
-                login(request, user)
-                return Response({'token': token.key, 'user_id': user.id})
+                if user.is_staff:
+                    # If user is an admin
+                    login(request, user)
+                    return Response({'message': "Welcome Admin!", 'user_id': user.id})
+                else:
+                    # If user is not an admin
+                    login(request, user)
+                    return Response({'message': "Welcome! You are successfully logged in.", 'user_id': user.id})
             else:
-                return Response({'error': "Invalid Credential"})
+                return Response({'error': "Invalid Credentials"})
         return Response(serializer.errors)
 
 
